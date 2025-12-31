@@ -1,2 +1,2 @@
 # Midi-step-motor-versiyon-1
-Bu projenin ana amacı step motorları kullanarak müzik yapmak çünkü neden olmasın. Yurtdışında halihazırda mevcut olan ama Türkiye'ye henüz gelmeyen bu projeyi sizlere armağan ediyorum. Midi dosyalarınızı python ile metin haline getirip sonrasında esp32'ye yükleyebiliyor ve bu şekilde müzik yapabiliyorsunuz.
+Bu projenin ana amacı step motorları kullanarak müzik yapmak çünkü neden olmasın. Yurtdışında halihazırda mevcut olan ama Türkiye'ye henüz gelmeyen bu projeyi sizlere armağan ediyorum. Midi dosyalarınızı python ile metin haline getirip sonrasında esp32'ye yükleyebiliyor ve bu şekilde müzik yapabiliyorsunuz. Projeyi Elektrahan YouTube kanalımda detaylı şekilde anlattım https://youtube.com/@elektrahan?si=tAI3R0UfWT_qVH2M
