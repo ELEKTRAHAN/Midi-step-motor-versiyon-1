@@ -1,0 +1,75 @@
+ import mido
+
+#Buraya ayrıştırma işlemi yapacağınız midi dosyasının ismini ve uzantısını yazmanız gerekiyor 
+mid = mido.MidiFile('badpiggies.mid', clip=True) #Buraya ayrıştırma işlemi yapacağınız midi dosyasının ismini ve uzantısını yazmanız gerekiyor
+numSpeakers = 8
+
+# tempo = us / beat
+def noteToFreq(note):
+    a = 440  # A4 = 440Hz
+    return (a / 32) * (2 ** ((note - 9) / 12))
+
+merged_midi = mido.MidiFile()
+merged_midi.tracks = [mido.merge_tracks(mid.tracks)]
+
+noteTable = []
+playedFreqs = {}
+
+for i, message in enumerate(merged_midi.tracks[0]):
+
+    if message.type == "note_on":
+        freq = round(noteToFreq(message.note))
+        speaker = 1
+
+        # speaker bul
+        if freq in playedFreqs:
+            speaker = playedFreqs[freq]
+        else:
+            if len(playedFreqs) < numSpeakers:
+                for sp in range(1, numSpeakers + 1):
+                    if sp not in playedFreqs.values():
+                        speaker = sp
+                        break
+            else:
+                # en düşük frekansı çalan hoparlörü çal
+                lowestTone = 10_000_000
+                for tone, sp in playedFreqs.items():
+                    if tone < lowestTone:
+                        lowestTone = tone
+                        speaker = sp
+
+        # note off (velocity 0)
+        if message.velocity == 0:
+            if freq in playedFreqs:
+                playedFreqs.pop(freq)
+                noteTable.append([speaker - 1, 0, message.time])
+        else:
+            playedFreqs[freq] = speaker
+            noteTable.append([speaker - 1, freq, message.time])
+
+    elif message.type == "set_tempo":
+        noteTable.append([numSpeakers + 1, message.tempo, message.time])
+
+    else:
+        if message.type == "end_of_track":
+            for sp in range(numSpeakers):
+                noteTable.append([sp, 0, 0])
+            noteTable.append([0, 0, 0])
+            break
+
+        # zamanı bir sonraki mesaja ekle
+        merged_midi.tracks[0][i + 1].time += message.tim
+
+noteTableStr = str(noteTable)
+noteTableStr = noteTableStr.replace("[", "{")
+noteTableStr = noteTableStr.replace("]", "}")
+
+noteTableStr = (
+    "uint32_t musicTable[][3] = "
+    + noteTableStr
+    + ";\nint musicLen = "
+    + str(len(noteTable) - 2)
+    + ";"
+)
+
+print(noteTableStr)
